@@ -2,7 +2,18 @@ import streamlit as st
 import pickle
 import pandas as pd
 import requests
+import gdown
+import os
 
+# --------- Download similarity.pkl if not present ---------
+
+file_id = "1jUUJO2w5tlIr8B_JXYzbaFF3ZIYn4RKc"
+url = f"https://drive.google.com/uc?id={file_id}"
+
+if not os.path.exists("similarity.pkl"):
+    gdown.download(url, "similarity.pkl", quiet=False)
+
+# --------- Load data ---------
 movies_dict = pickle.load(open('movie_dict.pkl', 'rb'))
 movies = pd.DataFrame(movies_dict)
 
@@ -26,16 +37,17 @@ def recommend(movie):
     movie_index = movies[movies['title'] == movie].index[0]
     distances = similarity[movie_index]
 
-    movies_list = sorted(list(enumerate(distances)),
-                         reverse=True,
-                         key=lambda x: x[1])[1:6]
+    movies_list = sorted(
+        list(enumerate(distances)),
+        reverse=True,
+        key=lambda x: x[1]
+    )[1:6]
 
     recommended_movies = []
     recommended_posters = []
 
     for i in movies_list:
         movie_title = movies.iloc[i[0]].title
-
         recommended_movies.append(movie_title)
         recommended_posters.append(fetch_poster(movie_title))
 
